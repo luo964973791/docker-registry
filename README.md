@@ -40,6 +40,22 @@ systemctl restart docker
 ### 启动
 
 ```javascript
+#启动minio
+docker run -d \
+  --name minio \
+  -p 9000:9000 -p 9001:9001 \
+  -e MINIO_ROOT_USER=admin \
+  -e MINIO_ROOT_PASSWORD=Test@123 \
+  --restart always \
+  quay.io/minio/minio server /data --console-address :9001
+  
+  
+#拷贝mc创建bucket
+docker cp minio:/usr/bin/mc .
+./mc alias set myminio http://localhost:9000 admin Test@123
+./mc mb myminio/docker-registry
+
+#启动镜像仓库
 docker run -d \
   --name registry \
   --restart=always \
@@ -48,5 +64,12 @@ docker run -d \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
   -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
   -e REGISTRY_HTTP_TLS_KEY=/certs/registry.key \
+  -e REGISTRY_STORAGE=s3 \
+  -e REGISTRY_STORAGE_S3_REGION=us-east-1 \
+  -e REGISTRY_STORAGE_S3_BUCKET=docker-registry \
+  -e REGISTRY_STORAGE_S3_ACCESSKEY=admin \
+  -e REGISTRY_STORAGE_S3_SECRETKEY=Test@123 \
+  -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://172.27.0.3:9000 \
+  -e REGISTRY_STORAGE_S3_FORCEPATHSTYLE=true \
   registry:2
 ```
