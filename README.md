@@ -128,7 +128,13 @@ docker run -d \
 ```javascript
 curl -sk https://registry.docker.com/v2/nginx/tags/list | python3 -m json.tool
 curl -sk https://registry.docker.com/v2/_catalog | python3 -m json.tool
-curl -s -k --header "Accept:application/vnd.docker.distribution.manifest.v2+json" -I -XGET https://registry.docker.com/v2/busybox/manifests/latest | grep "docker-content-digest" | cut -d ':' -f3  
+curl -s -k \
+  --header "Accept:application/vnd.docker.distribution.manifest.v2+json" \
+  -I -XGET https://registry.docker.com/v2/busybox/manifests/latest | \
+  grep "docker-content-digest" | \
+  cut -d ':' -f3
 
-curl -X DELETE https://registry.docker.com/v2/busybox/manifests/sha256:91c66c844e6bba57e92e10e755e73a816d0b99edd17eb5297d9ac519ab3a8c81 -k  
+curl -X DELETE \
+  https://registry.docker.com/v2/busybox/manifests/sha256:91c66c844e6bba57e92e10e755e73a816d0b99edd17eb5297d9ac519ab3a8c81 \
+  -k  
 ```
