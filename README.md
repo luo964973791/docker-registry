@@ -12,7 +12,11 @@ openssl genrsa -out registry.key 4096
 openssl req -new -key registry.key -out registry.csr -subj "/CN=registry.docker.com"
 
 # 用 CA 签发 registry 证书，包含 SAN
-openssl x509 -req -in registry.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out registry.crt -days 365 -sha256  -extfile <(printf "subjectAltName=DNS:registry.docker.com")  
+openssl x509 -req -in registry.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial \
+  -out registry.crt -days 365 -sha256 \
+  -extfile <(printf "subjectAltName=DNS:registry.docker.com")
+
 
 mkdir -p /etc/docker/certs.d/registry.docker.com
 #docker客户端配置证书
