@@ -55,7 +55,7 @@ docker cp minio:/usr/bin/mc .
 ./mc alias set myminio http://localhost:9000 admin Test@123
 ./mc mb myminio/docker-registry
 
-#启动镜像仓库
+#启动镜像仓库,由于是测试，就懒得设置用户密码.
 docker run -d \
   --name registry \
   --restart=always \
