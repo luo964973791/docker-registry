@@ -12,7 +12,7 @@ openssl genrsa -out registry.key 4096
 openssl req -new -key registry.key -out registry.csr -subj "/CN=registry.docker.com"
 
 # 用 CA 签发 registry 证书，包含 SAN
-openssl x509 -req -in registry.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out registry.crt -days 365 -sha256 -extfile <(printf "subjectAltName=DNS:registry.docker.com")
+openssl x509 -req -in registry.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out registry.crt -days 365 -sha256 -extfile <(printf "subjectAltName=DNS:registry.docker.com")  
 
 mkdir -p /etc/docker/certs.d/registry.docker.com
 #docker客户端配置证书
@@ -124,7 +124,7 @@ docker run -d \
 ```javascript
 curl -sk https://registry.docker.com/v2/nginx/tags/list | python3 -m json.tool
 curl -sk https://registry.docker.com/v2/_catalog | python3 -m json.tool
-curl -s -k --header "Accept:application/vnd.docker.distribution.manifest.v2+json" -I -XGET https://registry.docker.com/v2/busybox/manifests/latest | grep "docker-content-digest" | cut -d ':' -f3
+curl -s -k --header "Accept:application/vnd.docker.distribution.manifest.v2+json" -I -XGET https://registry.docker.com/v2/busybox/manifests/latest | grep "docker-content-digest" | cut -d ':' -f3  
 
-curl -X DELETE https://registry.docker.com/v2/busybox/manifests/sha256:91c66c844e6bba57e92e10e755e73a816d0b99edd17eb5297d9ac519ab3a8c81 -k
+curl -X DELETE https://registry.docker.com/v2/busybox/manifests/sha256:91c66c844e6bba57e92e10e755e73a816d0b99edd17eb5297d9ac519ab3a8c81 -k  
 ```
