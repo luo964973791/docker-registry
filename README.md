@@ -61,6 +61,7 @@ docker run -d \
   --restart=always \
   -p 443:443 \
   -v /root/certs:/certs \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
   -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
   -e REGISTRY_HTTP_TLS_KEY=/certs/registry.key \
