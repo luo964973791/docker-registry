@@ -39,7 +39,7 @@ cp /root/certs/ca.crt /etc/pki/ca-trust/source/anchors/ && update-ca-trust
 }
 
 
-[root@registry ~]# cat /etc/systemd/system/docker.service.d/http-proxy.conf 
+[root@node1 ~]# cat /etc/systemd/system/docker.service.d/http-proxy.conf 
 [Service]
 Environment="HTTP_PROXY=http://172.27.0.88:22"
 Environment="HTTPS_PROXY=http://172.27.0.88:22"
