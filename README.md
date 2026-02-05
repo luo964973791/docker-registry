@@ -37,6 +37,15 @@ cp /root/certs/ca.crt /etc/pki/ca-trust/source/anchors/ && update-ca-trust
 {
   "insecure-registries": ["registry.docker.com"]
 }
+
+
+[root@registry ~]# cat /etc/systemd/system/docker.service.d/http-proxy.conf 
+[Service]
+Environment="HTTP_PROXY=http://172.27.0.88:22"
+Environment="HTTPS_PROXY=http://172.27.0.88:22"
+Environment="NO_PROXY=localhost,127.0.0.1,registry.docker.com"   #如果有代理，需要把域名写到不使用代理里面.
+
+
 systemctl daemon-reload
 systemctl restart docker
 ```
