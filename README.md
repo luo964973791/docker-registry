@@ -1,6 +1,7 @@
 ### 提前创建证书
 
 ```javascript
+registry_domain='registry.docker.com'
 yum install openssl -y
 mkdir -p /root/certs && cd /root/certs
 # 生成 CA
@@ -9,42 +10,40 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt -subj "
 
 # 生成 registry 私钥和 CSR
 openssl genrsa -out registry.key 4096
-openssl req -new -key registry.key -out registry.csr -subj "/CN=registry.docker.com"
+openssl req -new -key registry.key -out registry.csr -subj "/CN=$registry_domain"
 
 # 用 CA 签发 registry 证书，包含 SAN
 openssl x509 -req -in registry.csr \
   -CA ca.crt -CAkey ca.key -CAcreateserial \
   -out registry.crt -days 365 -sha256 \
-  -extfile <(printf "subjectAltName=DNS:registry.docker.com")
+  -extfile <(printf "subjectAltName=DNS:$registry_domain")
 
 
-mkdir -p /etc/docker/certs.d/registry.docker.com
+mkdir -p /etc/docker/certs.d/$registry_domain
 #docker客户端配置证书
-cp /root/certs/ca.crt /etc/docker/certs.d/registry.docker.com/ca.crt
+cp /root/certs/ca.crt /etc/docker/certs.d/$registry_domain/ca.crt
 
 #服务器证书信任
 cp /root/certs/ca.crt /etc/pki/ca-trust/source/anchors/ && update-ca-trust
 
-#绑定域名
-[root@node1 tmp]# cat /etc/hosts
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-172.27.0.3  registry.docker.com
+#绑定hosts
+echo "$(hostname -I |awk '{print $1}') $registry_domain" >> /etc/hosts
 
 
 #docker添加域名信任.
-[root@node1 ~]# cat /etc/docker/daemon.json 
+cat <<EOF > /etc/docker/daemon.json
 {
-  "insecure-registries": ["registry.docker.com"]
+  "insecure-registries": ["$registry_domain"]
 }
+EOF
 
-
-[root@node1 ~]# cat /etc/systemd/system/docker.service.d/http-proxy.conf 
+mkdir -p /etc/systemd/system/docker.service.d
+cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf 
 [Service]
 Environment="HTTP_PROXY=http://172.27.0.88:22"
 Environment="HTTPS_PROXY=http://172.27.0.88:22"
-Environment="NO_PROXY=localhost,127.0.0.1,registry.docker.com"   #如果有代理，需要把域名写到不使用代理里面.
-
+Environment="NO_PROXY=localhost,127.0.0.1,$registry_domain"   #如果有代理，需要把域名写到不使用代理里面.
+EOF
 
 systemctl daemon-reload
 systemctl restart docker
@@ -82,7 +81,7 @@ docker run -d \
   -e REGISTRY_STORAGE_S3_BUCKET=docker-registry \
   -e REGISTRY_STORAGE_S3_ACCESSKEY=admin \
   -e REGISTRY_STORAGE_S3_SECRETKEY=Test@123 \
-  -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://172.27.0.3:9000 \
+  -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://$(hostname -I |awk '{print $1}'):9000 \
   -e REGISTRY_STORAGE_S3_FORCEPATHSTYLE=true \
   registry:2
 ```
@@ -128,7 +127,7 @@ docker run -d \
   -e REGISTRY_STORAGE_S3_BUCKET=docker-registry \
   -e REGISTRY_STORAGE_S3_ACCESSKEY=admin \
   -e REGISTRY_STORAGE_S3_SECRETKEY=Test@123 \
-  -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://172.27.0.3:9000 \
+  -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://$(hostname -I |awk '{print $1}'):9000 \
   -e REGISTRY_STORAGE_S3_FORCEPATHSTYLE=true \
   registry:2
 ```
