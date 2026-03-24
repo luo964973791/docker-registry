@@ -38,11 +38,13 @@ cat <<EOF > /etc/docker/daemon.json
 EOF
 
 mkdir -p /etc/systemd/system/docker.service.d
+
+#如果有代理，需要把域名写到不使用代理里面.
 cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf 
 [Service]
 Environment="HTTP_PROXY=http://172.27.0.88:22"
 Environment="HTTPS_PROXY=http://172.27.0.88:22"
-Environment="NO_PROXY=localhost,127.0.0.1,$registry_domain"   #如果有代理，需要把域名写到不使用代理里面.
+Environment="NO_PROXY=localhost,127.0.0.1,$registry_domain"
 EOF
 
 systemctl daemon-reload
