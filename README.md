@@ -27,7 +27,7 @@ cp /root/certs/ca.crt /etc/docker/certs.d/$registry_domain/ca.crt
 cp /root/certs/ca.crt /etc/pki/ca-trust/source/anchors/ && update-ca-trust
 
 #绑定hosts
-echo "$(hostname -I |awk '{print $1}') $registry_domain" >> /etc/hosts
+echo "$(hostname -I |awk '{print $1}') localhost $registry_domain" >> /etc/hosts
 
 
 #docker添加域名信任.
