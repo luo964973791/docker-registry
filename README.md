@@ -73,6 +73,7 @@ docker cp minio:/usr/bin/mc .
 #./mc quota info myminio/docker-registry #查看是否有配额限制桶大小,0代表没限制.
 #./mc du myminio/docker-registry   #查看大小
 #./mc cp /root/kubespray myminio/docker-registry/ --recursive    #复制目录命令
+#./mc anonymous set download myminio/test  #设置可以下载文件权限
 
 #启动镜像仓库,由于是测试，就懒得设置用户密码.
 docker run -d \
