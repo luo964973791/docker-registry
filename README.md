@@ -74,6 +74,7 @@ docker cp minio:/usr/bin/mc .
 #./mc du myminio/docker-registry   #查看大小
 #./mc cp /root/kubespray myminio/docker-registry/ --recursive    #复制目录命令
 #./mc anonymous set download myminio/test  #设置可以下载文件权限
+#wget http://172.27.0.6:9000/test/index.html #测试是否可以下载
 
 #启动镜像仓库,由于是测试，就懒得设置用户密码.
 docker run -d \
