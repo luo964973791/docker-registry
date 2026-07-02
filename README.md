@@ -1,7 +1,7 @@
 ### 提前创建证书
 
 ```javascript
-registry_domain='registry.tcs.com'
+registry_domain='registry.docker.com'
 yum install openssl -y
 mkdir -p /root/certs && cd /root/certs
 
