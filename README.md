@@ -1,30 +1,30 @@
 ### 提前创建证书
 
 ```javascript
-registry_domain='registry.docker.com'
+registry_domain='registry.tcs.com'
 yum install openssl -y
 mkdir -p /root/certs && cd /root/certs
+
 # 生成 CA
-openssl genrsa -out ca.key 4096
-openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt -subj "/CN=MyRegistryCA"
+openssl genrsa -out ${registry_domain}.ca.key 4096
+openssl req -x509 -new -nodes -key ${registry_domain}.ca.key -sha256 -days 3650 -out ${registry_domain}.ca.crt -subj "/CN=MyRegistryCA"
 
 # 生成 registry 私钥和 CSR
-openssl genrsa -out registry.key 4096
-openssl req -new -key registry.key -out registry.csr -subj "/CN=$registry_domain"
+openssl genrsa -out ${registry_domain}.key 4096
+openssl req -new -key ${registry_domain}.key -out ${registry_domain}.csr -subj "/CN=$registry_domain"
 
 # 用 CA 签发 registry 证书，包含 SAN
-openssl x509 -req -in registry.csr \
-  -CA ca.crt -CAkey ca.key -CAcreateserial \
-  -out registry.crt -days 365 -sha256 \
+openssl x509 -req -in ${registry_domain}.csr \
+  -CA ${registry_domain}.ca.crt -CAkey ${registry_domain}.ca.key -CAcreateserial \
+  -out ${registry_domain}.crt -days 365 -sha256 \
   -extfile <(printf "subjectAltName=DNS:$registry_domain")
 
-
 mkdir -p /etc/docker/certs.d/$registry_domain
-#docker客户端配置证书
-cp /root/certs/ca.crt /etc/docker/certs.d/$registry_domain/ca.crt
+# docker客户端配置证书
+cp /root/certs/${registry_domain}.crt /etc/docker/certs.d/$registry_domain/${registry_domain}.crt
 
-#服务器证书信任
-cp /root/certs/ca.crt /etc/pki/ca-trust/source/anchors/ && update-ca-trust
+# 服务器证书信任
+cp /root/certs/${registry_domain}.crt /etc/pki/ca-trust/source/anchors/${registry_domain}.crt && update-ca-trust
 
 #绑定hosts
 echo "$(hostname -I |awk '{print $1}') localhost $registry_domain" >> /etc/hosts
@@ -83,8 +83,8 @@ docker run -d \
   -v /root/certs:/certs \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
-  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
-  -e REGISTRY_HTTP_TLS_KEY=/certs/registry.key \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/${registry_domain}.crt \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/${registry_domain}.key \
   -e REGISTRY_STORAGE=s3 \
   -e REGISTRY_STORAGE_S3_REGION=us-east-1 \
   -e REGISTRY_STORAGE_S3_BUCKET=docker-registry \
