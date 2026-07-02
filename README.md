@@ -7,7 +7,7 @@ mkdir -p /root/certs && cd /root/certs
 
 # 生成 CA
 openssl genrsa -out ${registry_domain}.ca.key 4096
-openssl req -x509 -new -nodes -key ${registry_domain}.ca.key -sha256 -days 3650 -out ${registry_domain}.ca.crt -subj "/CN=MyRegistryCA"
+openssl req -x509 -new -nodes -key ${registry_domain}.ca.key -sha256 -days 36500 -out ${registry_domain}.ca.crt -subj "/CN=MyRegistryCA"
 
 # 生成 registry 私钥和 CSR
 openssl genrsa -out ${registry_domain}.key 4096
@@ -16,7 +16,7 @@ openssl req -new -key ${registry_domain}.key -out ${registry_domain}.csr -subj "
 # 用 CA 签发 registry 证书，包含 SAN
 openssl x509 -req -in ${registry_domain}.csr \
   -CA ${registry_domain}.ca.crt -CAkey ${registry_domain}.ca.key -CAcreateserial \
-  -out ${registry_domain}.crt -days 365 -sha256 \
+  -out ${registry_domain}.crt -days 36500 -sha256 \
   -extfile <(printf "subjectAltName=DNS:$registry_domain")
 
 mkdir -p /etc/docker/certs.d/$registry_domain
