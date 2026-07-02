@@ -31,11 +31,11 @@ echo "$(hostname -I |awk '{print $1}') localhost $registry_domain" >> /etc/hosts
 
 
 #docker添加域名信任.
-cat <<EOF > /etc/docker/daemon.json
-{
-  "insecure-registries": ["$registry_domain"]
-}
-EOF
+#cat <<EOF > /etc/docker/daemon.json
+#{
+#  "insecure-registries": ["$registry_domain"]
+#}
+#EOF
 
 mkdir -p /etc/systemd/system/docker.service.d
 
