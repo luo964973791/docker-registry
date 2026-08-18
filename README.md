@@ -185,7 +185,7 @@ server = "https://${registry_domain}"
 
 [host."https://${registry_domain}"]
   capabilities = ["pull", "resolve", "push"]
-  skip_verify = false
+  skip_verify = true
   override_path = false
 EOF
 
