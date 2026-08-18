@@ -194,4 +194,40 @@ cp /root/certs/${registry_domain}.crt /etc/pki/ca-trust/source/anchors/${registr
 echo "$(hostname -I |awk '{print $1}') localhost $registry_domain" >> /etc/hosts
 
 systemctl restart containerd
+
+nerdctl run -d \
+  --name minio \
+  -p 9000:9000 -p 9001:9001 \
+  -e MINIO_ROOT_USER=admin \
+  -e MINIO_ROOT_PASSWORD=Test@123 \
+  --restart always \
+  quay.io/minio/minio server /data --console-address :9001
+
+
+nerdctl cp minio:/usr/bin/mc .
+./mc alias set myminio http://localhost:9000 admin Test@123
+./mc mb myminio/docker-registry
+
+
+nerdctl run -d \
+  --name registry \
+  --restart=always \
+  -p 443:443 \
+  -v /root/certs:/certs \
+  -v /root/auth:/auth \
+  -e REGISTRY_AUTH=htpasswd \
+  -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" \
+  -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+  -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/registry.key \
+  -e REGISTRY_STORAGE=s3 \
+  -e REGISTRY_STORAGE_S3_REGION=us-east-1 \
+  -e REGISTRY_STORAGE_S3_BUCKET=docker-registry \
+  -e REGISTRY_STORAGE_S3_ACCESSKEY=admin \
+  -e REGISTRY_STORAGE_S3_SECRETKEY=Test@123 \
+  -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://$(hostname -I |awk '{print $1}'):9000 \
+  -e REGISTRY_STORAGE_S3_FORCEPATHSTYLE=true \
+  registry:2
 ```
