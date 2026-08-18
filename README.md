@@ -192,4 +192,6 @@ EOF
 cp /root/certs/${registry_domain}.crt /etc/pki/ca-trust/source/anchors/${registry_domain}.crt && update-ca-trust
 
 echo "$(hostname -I |awk '{print $1}') localhost $registry_domain" >> /etc/hosts
+
+systemctl restart containerd
 ```
