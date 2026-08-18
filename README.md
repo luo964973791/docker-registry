@@ -156,3 +156,40 @@ curl -X DELETE \
   https://registry.docker.com/v2/busybox/manifests/sha256:91c66c844e6bba57e92e10e755e73a816d0b99edd17eb5297d9ac519ab3a8c81 \
   -k  
 ```
+
+
+
+
+
+### containerd运行时部署方式
+```
+registry_domain='registry.containerd.com'
+yum install openssl -y
+mkdir -p /root/certs && cd /root/certs
+
+openssl genrsa -out ${registry_domain}.ca.key 4096
+openssl req -x509 -new -nodes -key ${registry_domain}.ca.key -sha256 -days 36500 -out ${registry_domain}.ca.crt -subj "/CN=MyRegistryCA"
+
+openssl genrsa -out ${registry_domain}.key 4096
+openssl req -new -key ${registry_domain}.key -out ${registry_domain}.csr -subj "/CN=$registry_domain"
+
+openssl x509 -req -in ${registry_domain}.csr \
+  -CA ${registry_domain}.ca.crt -CAkey ${registry_domain}.ca.key -CAcreateserial \
+  -out ${registry_domain}.crt -days 36500 -sha256 \
+  -extfile <(printf "subjectAltName=DNS:$registry_domain")
+  
+mkdir -p /etc/containerd/certs.d/$registry_domain
+cp /root/certs/${registry_domain}.crt /etc/containerd/certs.d/$registry_domain/ca.crt
+cat > /etc/containerd/certs.d/$registry_domain/hosts.toml <<EOF
+server = "https://${registry_domain}"
+
+[host."https://${registry_domain}"]
+  capabilities = ["pull", "resolve", "push"]
+  skip_verify = false
+  override_path = false
+EOF
+
+cp /root/certs/${registry_domain}.crt /etc/pki/ca-trust/source/anchors/${registry_domain}.crt && update-ca-trust
+
+echo "$(hostname -I |awk '{print $1}') localhost $registry_domain" >> /etc/hosts
+```
