@@ -193,6 +193,11 @@ cp /root/certs/${registry_domain}.crt /etc/pki/ca-trust/source/anchors/${registr
 
 echo "$(hostname -I |awk '{print $1}') localhost $registry_domain" >> /etc/hosts
 
+
+[root@node1 ~]# cat /etc/systemd/system/containerd.service.d/http-proxy.conf 
+[Service]
+Environment="HTTP_PROXY=http://172.27.0.88:7897" "HTTPS_PROXY=http://172.27.0.88:7897" "NO_PROXY=localhost,127.0.0.1,registry.docker.com"
+
 systemctl restart containerd
 
 nerdctl run -d \
