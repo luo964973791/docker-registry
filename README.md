@@ -130,8 +130,8 @@ docker run -d \
   -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
-  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
-  -e REGISTRY_HTTP_TLS_KEY=/certs/registry.key \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/${registry_domain}.crt \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/${registry_domain}.key \
   -e REGISTRY_STORAGE=s3 \
   -e REGISTRY_STORAGE_S3_REGION=us-east-1 \
   -e REGISTRY_STORAGE_S3_BUCKET=docker-registry \
@@ -225,8 +225,8 @@ nerdctl run -d \
   -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
-  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
-  -e REGISTRY_HTTP_TLS_KEY=/certs/registry.key \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/${registry_domain}.crt \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/${registry_domain}.key \
   -e REGISTRY_STORAGE=s3 \
   -e REGISTRY_STORAGE_S3_REGION=us-east-1 \
   -e REGISTRY_STORAGE_S3_BUCKET=docker-registry \
