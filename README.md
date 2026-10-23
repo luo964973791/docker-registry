@@ -148,11 +148,41 @@ docker cp minio:/usr/bin/mc .
 mkdir -p /root/auth
 docker run --name htpasswd --entrypoint htpasswd httpd:2.4 -Bbn admin MyPassword123 > /root/auth/htpasswd
 docker rm -f htpasswd
+
+
+mkdir /data/registry
+cat > /data/registry/config.yml <<'EOF'
+version: 0.1
+log:
+  fields:
+    service: registry
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+http:
+  addr: :5000
+  headers:
+    X-Content-Type-Options: [nosniff]
+  debug:
+    addr: 0.0.0.0:5001
+    prometheus:
+      enabled: true
+      path: /metrics
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
+EOF
 docker run -d \
   --name registry \
   --restart=always \
   -p 443:443 \
+  -p 5001:5001 \
   -v /root/certs:/certs \
+  -v /data/registry/config.yml:/etc/docker/registry/config.yml:ro \
   -v /root/auth:/auth \
   -e REGISTRY_AUTH=htpasswd \
   -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" \
