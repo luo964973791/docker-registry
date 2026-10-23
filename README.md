@@ -76,12 +76,40 @@ docker cp minio:/usr/bin/mc .
 #./mc anonymous set download myminio/test  #设置可以下载文件权限
 #wget http://172.27.0.6:9000/test/index.html #测试是否可以下载
 
+
+mkdir /data/registry
+cat > /data/registry/config.yml <<'EOF'
+version: 0.1
+log:
+  fields:
+    service: registry
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+http:
+  addr: :5000
+  headers:
+    X-Content-Type-Options: [nosniff]
+  debug:
+    addr: 0.0.0.0:5001
+    prometheus:
+      enabled: true
+      path: /metrics
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
+EOF
 #启动镜像仓库,由于是测试，就懒得设置用户密码.
 docker run -d \
   --name registry \
   --restart=always \
   -p 443:443 \
   -v /root/certs:/certs \
+  -v /data/registry/config.yml:/etc/docker/registry/config.yml:ro \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
   -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/${registry_domain}.crt \
