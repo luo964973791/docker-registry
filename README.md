@@ -108,6 +108,7 @@ docker run -d \
   --name registry \
   --restart=always \
   -p 443:443 \
+  -p 5001:5001 \
   -v /root/certs:/certs \
   -v /data/registry/config.yml:/etc/docker/registry/config.yml:ro \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true \
